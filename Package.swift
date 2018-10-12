@@ -15,11 +15,11 @@ let package = Package(
         .target(
             name: "Ir",
             dependencies: ["Utils"],
-            path: "Sources/ir"),
+            path: "Sources/Ir"),
 
         .target(
             name: "Utils",
-            path: "Sources/utils"),
+            path: "Sources/Utils"),
         
         .testTarget(
             name: "swiftsearchengineTests",
