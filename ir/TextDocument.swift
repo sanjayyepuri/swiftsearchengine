@@ -18,8 +18,6 @@ class TextDocument: Document {
     
  
     override init(file: FileHandle) {
-        
-        
         bufReader = BufferedReader(file: file)
         super.init(file: file)
     }
@@ -27,18 +25,14 @@ class TextDocument: Document {
     override func getNextToken() -> String? {
         while currentLine.isEmpty {
             if let str = bufReader.read() {
-                
-                currentLine = str.components(separatedBy: TextDocument.charSet.inverted)
+                currentLine = str.components(separatedBy: TextDocument.charSet.inverted).filter({ $0.count > 0 })
             } else {
                 isEmpty = true
                 return nil
             }
         }
         
-        let str = currentLine.removeFirst().trimmingCharacters(in: TextDocument.charSet.inverted)
-        if str.count == 0{
-            return getNextToken()
-        }
+        let str = currentLine.removeFirst()
         return str
     }
     
@@ -47,7 +41,7 @@ class TextDocument: Document {
         
         while currentLine.isEmpty {
             if let str = bufReader.read() {
-                currentLine = str.split(separator: " ").map(String.init)
+                currentLine = str.components(separatedBy: TextDocument.charSet.inverted).filter({ $0.count > 0 })
             } else {
                 isEmpty = true
                 return false

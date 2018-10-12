@@ -23,5 +23,5 @@ do  {
 
 
 
-let str: String = "https://devel@oper.apple.com/docume.ntation/foundation/characterset/1779632-alphanumerics"
+let str: String = "===="
 print(str.components(separatedBy: TextDocument.charSet.inverted))
