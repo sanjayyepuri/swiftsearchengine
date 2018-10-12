@@ -20,14 +20,33 @@ class InvertedIndex {
             let files = try fileManager.contentsOfDirectory(atPath: directory.path)
             for file in files {
                 do {
-                    try indexDocument(doc: TextDocument(file: FileHandle(forReadingFrom: URL(fileURLWithPath: directory.path + "/" + file))))
-                    print("Indexed \(file)")
+                    let url: URL = directory.appendingPathComponent(file)
+                    
+                    print("Indexing \(file)")
+                    try indexDocument(doc: TextDocument(file: FileHandle(forReadingFrom: url)))
+                   
                 } catch {
                     print("Error indexing \(file): \(error)")
                 }
             }
         } catch {
             print("Error indexing \(directory.path): \(error)")
+            return
+        }
+        
+        // compute tf/idf for each token
+        for (token, postingList) in invertedIndex {
+            let idf: Double = log(Double(docRefs.count)/Double(postingList.postings.count))
+            
+            for posting in postingList.postings {
+                posting.documentRef.length += pow(idf * Double(posting.tf), 2)
+                posting.documentRef.vector.vector[token] = Double(posting.tf) * idf
+            }
+        }
+        
+        // compute length for each token
+        for doc in docRefs {
+            doc.length = sqrt(doc.length)
         }
         
     }
@@ -53,6 +72,7 @@ class InvertedIndex {
 class DocumentReference {
     let doc: Document
     let vector: MapVector
+    var length: Double = 0;
     
     init(document: Document, vector: MapVector) {
         self.doc = document
