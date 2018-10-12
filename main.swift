@@ -6,16 +6,16 @@ do  {
     let reader = BufferedReader(file: file)
     
     
-    var str: String?
-    repeat {
-        str = reader.read()
-        print(str)
-    } while str != nil
+//    var str: String?
+//    repeat {
+//        str = reader.read()
+//        print(str)
+//    } while str != nil
+//
     
-    
-//    while doc.hasTokens() {
-//        print(doc.getNextToken() ?? "none")
-//    }
+    while doc.hasTokens() {
+        print(doc.getNextToken() ?? "none")
+    }
 } catch {
 
 }
@@ -23,5 +23,5 @@ do  {
 
 
 
-let str: String = "https://developer.apple.com/docume.ntation/foundation/characterset/1779632-alphanumerics"
+let str: String = "https://devel@oper.apple.com/docume.ntation/foundation/characterset/1779632-alphanumerics"
 print(str.components(separatedBy: TextDocument.charSet.inverted))

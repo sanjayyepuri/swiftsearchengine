@@ -55,15 +55,13 @@ class BufferedReader {
             } else {
                 str.write(String(data: buffer, encoding: encoding)!)
                 buffer.removeAll()
-            }
-            
-            if !fillBuffer() && buffer.count == 0 {
-                if str.count > 0 {
-                    return str
+                if !fillBuffer() && buffer.count == 0 {
+                    if str.count > 0 {
+                        return str
+                    }
+                    return nil
                 }
-                return nil
             }
-            
         } while true
     }
 }
