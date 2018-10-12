@@ -47,11 +47,6 @@ class BufferedReader {
         var str: String = ""
         
         repeat {
-            if(!fillBuffer()) {
-                if(str.count > 0) { return str }
-                return nil
-            }
-            
             if let range = buffer.range(of: delimiter, options: [], in: buffer.startIndex..<buffer.endIndex) {
                 let data = buffer.subdata(in: buffer.startIndex..<range.lowerBound)
                 str.write(String(data: data, encoding: encoding)!)
@@ -60,6 +55,13 @@ class BufferedReader {
             } else {
                 str.write(String(data: buffer, encoding: encoding)!)
                 buffer.removeAll()
+            }
+            
+            if !fillBuffer() && buffer.count == 0 {
+                if str.count > 0 {
+                    return str
+                }
+                return nil
             }
             
         } while true
