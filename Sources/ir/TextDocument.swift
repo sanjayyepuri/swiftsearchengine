@@ -7,20 +7,31 @@
 //
 
 import Foundation
+import Utils
 
 
 class TextDocument: Document {
+    /// The BufferedReader used to read the file line by line.
     let bufReader: BufferedReader
+    
+    /// The tokens that are left in the line that had been read last
     var currentLine: [String] = []
+    
+    /// Is true if there are no more tokens in the file.
     var isEmpty: Bool = false
     
-    static let charSet = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMONOPQRSTUVWXYZ01234567890")
+    /// The Character set that contains the tokens that should not be used to delimit tokens.
+    static let charSet = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890")
     
- 
+    /// Constructs the TextDocument with the BufferedReader used to parse the file.
+    ///
+    /// - Parameters:
+    ///     - file: The FileHandle for the file to be read.
     override init(file: FileHandle) {
         bufReader = BufferedReader(file: file)
         super.init(file: file)
     }
+
     
     override func getNextToken() -> String? {
         while currentLine.isEmpty {

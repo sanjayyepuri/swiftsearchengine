@@ -10,6 +10,10 @@ import Foundation
 
 class PostingList {
     var postings: [Posting] = []
+    
+    func append(_ posting: Posting) {
+        postings.append(posting)
+    }
 }
 
 class Posting {

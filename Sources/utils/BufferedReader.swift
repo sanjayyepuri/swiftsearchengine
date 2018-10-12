@@ -8,16 +8,32 @@
 
 import Foundation
 
-class BufferedReader {
+public class BufferedReader {
+    /// The file to be read.
     let file: FileHandle
+    
+    /// The size of the buffer.
     let bufferSize: Int
+    
+    /// The delimiter used to seprate tokens kept as a Data object.
     let delimiter: Data
+    
+    /// The encoding of the current file.
     let encoding: String.Encoding
     
+    /// The current Data buffer.
     var buffer: Data
+    
+    /// A Bool that stores whether the end of the file has been reached (The entire document has been read).
     var atEOF: Bool = false
     
-    init(file: FileHandle, bufferSize: Int = 4096, delimiter: String = "\n", encoding: String.Encoding = .utf8) {
+    /// Constructs a Buffered Reader with the given file handle.
+    /// - Parameters:
+    ///     - file: The FileHandle who should be read.
+    ///     - bufferSize: The length of the buffer to be kept.
+    ///     - delimeter: The character to seperate tokens.
+    ///     - encoding: The String.Encoding of the file.
+    public init(file: FileHandle, bufferSize: Int = 4096, delimiter: String = "\n", encoding: String.Encoding = .utf8) {
         self.file = file
         self.bufferSize = bufferSize
         self.encoding = encoding
@@ -25,12 +41,18 @@ class BufferedReader {
         self.buffer = Data(capacity: 4096)
     }
     
-    func fillBuffer() -> Bool {
+    /// A helper function that will try to fill the entire buffer.
+    ///
+    /// - Returns: Whether bytes have been added to the buffer.
+    private func fillBuffer() -> Bool {
+        // If the file has been read, there are no more bytes to add
         if atEOF { return false }
         
+        /// Fill the empty space of the buffer.
         if buffer.count < bufferSize {
             let size = bufferSize - buffer.count;
             let data = file.readData(ofLength: size)
+            // If data's size is 0 there are no more bytes to be read
             if data.count == 0 {
                 atEOF = true
                 return false
@@ -43,7 +65,10 @@ class BufferedReader {
         return true
     }
     
-    func read() -> String? {
+    /// This function returns the next token from the file or nil of there are no more tokens to be read.
+    ///
+    /// - Returns: The next token from the file or nil of the end of the file is reached 
+    public func read() -> String? {
         var str: String = ""
         
         repeat {
@@ -55,7 +80,7 @@ class BufferedReader {
             } else {
                 str.write(String(data: buffer, encoding: encoding)!)
                 buffer.removeAll()
-                if !fillBuffer() && buffer.count == 0 {
+                if !fillBuffer() {
                     if str.count > 0 {
                         return str
                     }

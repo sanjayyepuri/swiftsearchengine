@@ -38,6 +38,12 @@ class MapVector {
         self.vector.updateValue(weight, forKey: token)
     }
     
+    func scale(factor: Double) -> Void {
+        for (token, weight) in vector {
+            vector[token] = factor * weight
+        }
+    }
+    
     func dotProduct(other: MapVector) -> Double {
         
         var sum: Double = 0;
