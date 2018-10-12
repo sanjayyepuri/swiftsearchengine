@@ -14,9 +14,13 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "Ir",
-            dependencies: ["Utils"]),
+            dependencies: ["Utils"],
+            path: "Sources/ir"),
+
         .target(
-            name: "Utils"),
+            name: "Utils",
+            path: "Sources/utils"),
+        
         .testTarget(
             name: "swiftsearchengineTests",
             dependencies: ["Ir", "Utils"]),
