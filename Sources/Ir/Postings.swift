@@ -10,6 +10,7 @@ import Foundation
 
 class PostingList: CustomStringConvertible {
     var postings: [Posting] = []
+    var idf: Double = 0
     
     public var description : String { return "\(postings)"}
     

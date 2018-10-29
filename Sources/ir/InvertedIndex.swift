@@ -35,10 +35,12 @@ class InvertedIndex {
         }
         
         // compute tf/idf for each token
-        for (token, postingList) in invertedIndex {
-            let idf: Double = log(Double(docRefs.count)/Double(postingList.postings.count))
+        for (token, postings) in invertedIndex {
+            let idf: Double = log(Double(docRefs.count)/Double(postings.postings.count))
             
-            for posting in postingList.postings {
+            postings.idf = idf;
+            
+            for posting in postings.postings {
                 posting.documentRef.length += pow(idf * Double(posting.tf), 2)
                 posting.documentRef.vector.vector[token] = Double(posting.tf) * idf
             }
@@ -55,14 +57,19 @@ class InvertedIndex {
     ///
     /// - Parameters
     ///     - doc: The document to be indexed. 
-    func indexDocument(doc: Document) -> Void {
+    func indexDocument(doc: TextDocument) -> Void {
         let vector = doc.getVector()
         let docRef = DocumentReference(document: doc, vector: vector)
+        
+        // Add the document to the list of indexed documents
         docRefs.append(docRef)
         
         // Index each token.
         for (token, weight) in vector.vector {
+            // Create a posting object for the document. The term frequency
+            // is the weight of the term in the HMV.
             let newPosting = Posting(documentRef: docRef , tf: Int(weight))
+            // Add the documents to the posting list.
             if let posting = invertedIndex[token] {
                 posting.append(posting: newPosting)
             } else {
@@ -71,16 +78,59 @@ class InvertedIndex {
             }
         }
     }
+    
+    func queryIndex(query: String) -> [DocumentReference]{
+        let queryDoc = QueryDocument(query: query, charSet: TextDocument.charSet)
+        let queryVector = queryDoc.getVector()
+
+        var retrievalDict: [DocumentReference: Double] = [:]
+        
+        // Create a list of possible retrievals
+        for var entry in queryVector.vector {
+            if let postings = invertedIndex[entry.key] {
+                // Compute the query vector's weights.
+                entry.value = entry.value * postings.idf
+                // Increment the weight of all the matching documents and
+                // iteratively calculate the dot product.
+                for posting in postings.postings {
+                    if var weight = retrievalDict[posting.documentRef] {
+                        weight += entry.value * Double(posting.tf)
+                    } else {
+                        retrievalDict[posting.documentRef] = entry.value * Double(posting.tf)
+                    }
+                }
+            } else { entry.value = 0 }
+        }
+        
+        // Normalize all the scores of the retrieved documents.
+        // (cosine similarity)
+        let l = queryVector.length
+        for (docRef, var weight) in retrievalDict {
+            let y = docRef.length
+            weight = weight/(l*y)
+        }
+        
+        // sort the retrievals and create a list of document references ow
+        return retrievalDict.sorted(by: {$0.value < $1.value}).map({ return $0.key })
+    }
 }
 
-class DocumentReference {
-    let doc: Document
+class DocumentReference: Hashable, Equatable {
+    let doc: TextDocument
     let vector: MapVector
     var length: Double = 0;
     
-    init(document: Document, vector: MapVector) {
+    init(document: TextDocument, vector: MapVector) {
         self.doc = document
         self.vector = vector
+    }
+    
+    static func == (lhs: DocumentReference, rhs: DocumentReference) -> Bool {
+        return rhs.doc.file == lhs.doc.file
+    }
+    
+    var hashValue: Int {
+        return doc.file.hashValue
     }
 }
 
